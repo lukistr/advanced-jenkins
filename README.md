@@ -12,3 +12,5 @@ Gitea:
 Vagrantfile using 
   config.vm.box="luki_strike/Ubuntu"
   config.vm.box_version = "1.0.0"
+
+gitea/web-hook.sh not working.
