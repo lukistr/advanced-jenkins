@@ -1,0 +1,102 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1282.ve6d865025906">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2118.v31fd5b_9944b_5"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2118.v31fd5b_9944b_5">
+      <jobProperties/>
+      <triggers/>
+      <parameters/>
+      <options/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@3629.v8177e69e359a_">
+    <script>pipeline
+{
+    agent
+    {
+        label &apos;docker-node&apos;
+    }
+    stages
+    {
+        stage(&apos;Clone the project&apos;) 
+        {
+            steps 
+            {
+                sh &apos;&apos;&apos;
+                    sudo mkdir /projects || true
+                    sudo chown -R jenkins:jenkins /projects
+                    cd /projects
+                    if [ -d /projects/appcourse ]; then 
+                      cd /projects/appcourse
+                      git pull https://github.com/lukistr/appcourse.git
+                    else
+                      git clone https://github.com/lukistr/appcourse.git
+                    fi
+                    &apos;&apos;&apos;
+            }
+        }
+        stage(&apos;Start docker compose&apos;)
+        {
+            steps
+            {
+                sh &apos;&apos;&apos;
+					cp /vagrant/docker-build-compose.yaml /projects/appcourse
+					docker compose -f /projects/appcourse/docker-build-compose.yaml up -d
+                &apos;&apos;&apos;
+            }
+        }
+                stage(&apos;Wait Web server start&apos;)
+        {
+            steps
+            {
+                sh &apos;&apos;&apos;
+    				until curl --silent --fail http://192.168.11.102:8080/ &gt;/dev/null; do
+                        echo &quot;Waiting for Web server to start...&quot;
+                        sleep 10
+                    done
+                &apos;&apos;&apos;
+            }
+        }
+        stage(&apos;Test&apos;)
+        {
+            steps
+            {
+                script
+                {
+                    sh&apos;&apos;&apos;
+                        echo &apos;Test #1 - Reachability&apos;
+                        echo $(curl --write-out &quot;%{http_code}&quot; --silent --output /dev/null http://192.168.11.102:8080) | grep 200
+                    
+                        echo &apos;Test #2 - Sofia Population Appears&apos;
+                        curl --silent http://192.168.11.102:8080 | grep 1248452
+                    
+                        echo &apos;Test #3 - Looking for city Русе&apos;
+                        curl --silent http://192.168.11.102:8080 | grep &quot;Русе&quot;
+                    &apos;&apos;&apos;
+                }
+            }
+        }
+        stage(&apos;CleanUp&apos;)
+        {
+            steps
+            {
+                sh &apos;docker compose -f /projects/appcourse/docker-build-compose.yaml down&apos;
+            }
+        }
+    }
+    post
+    {
+        always
+        {
+            cleanWs()
+        }
+    }
+}</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
