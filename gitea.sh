@@ -30,15 +30,3 @@ git commit -m "Build repo"
 
 echo "* Push repo ..."
 git push -o repo.private=false http://vagrant:docker@192.168.11.102:3000/vagrant/gitea-bgapp
-
-echo "* Download Jenkins CLI ..."
-curl -o /home/vagrant/jenkins-cli.jar http://192.168.11.101:8080/jnlpJars/jenkins-cli.jar
-sudo chmod 0777 /home/vagrant/jenkins-cli.jar
-
-sleep 60
-
-echo '* Create Jenkins job ...'
-java -jar /home/vagrant/jenkins-cli.jar -s http://192.168.11.101:8080/ -http -auth jenkins:jenkins create-job Gitea-web < /vagrant/Gitea-web.xml
-
-echo '* Build job ...'
-java -jar /home/vagrant/jenkins-cli.jar -s http://192.168.11.101:8080/ -http -auth jenkins:jenkins build Gitea-web -f -v

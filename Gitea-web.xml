@@ -53,10 +53,7 @@
             steps
             {
                 sh &apos;&apos;&apos;
-    				until curl --silent --fail http://192.168.11.102:8080/ &gt;/dev/null; do
-                        echo &quot;Waiting for Web server to start...&quot;
-                        sleep 10
-                    done
+                        sleep 30
                 &apos;&apos;&apos;
             }
         }

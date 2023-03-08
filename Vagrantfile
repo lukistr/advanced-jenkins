@@ -25,6 +25,7 @@ Vagrant.configure("2") do |config|
 	docker.vm.provision "shell", path: "create-user.sh"
 	docker.vm.provision "shell", path: "docker.sh"
 	docker.vm.provision "shell", path: "gitea.sh"
+	docker.vm.provision "shell", path: "jobs-jenkins.sh"
   end
   
 end
